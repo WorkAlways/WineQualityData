@@ -1,0 +1,234 @@
+---
+title: "WineQuality"
+author: "Suchitra"
+date: "2/18/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#install.packages("dplyr")
+library(dplyr)
+library(ggplot2)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+Variable definition:
+
+Fixed acidity: Acid involved with wine that are non-volatile.
+Volatile acidity: Acetic acid in wine that at high levels leads to a taste of vinegar.
+Citric acid: Present in small quantities, add freshness and flavor to wine.
+Residual sugar: Sugra thats left after the fermentation stops.
+chlorides:The amount of salts in wine.
+Free sulphur dioxide:Prevents microbial growth and oxidation of wine.
+Total: Amount of free + bound forms of SO2.
+Density: Depends on the percent alcohol and sugar content.
+PH : Acidic or basic.
+Sulphates: Wine additive which ontributes to sulphur dioxide.
+Alcohol: Percent alcohol content in wine.
+Quality: Output variable.
+
+Questions:
+1. How is human tasting of wine related to the chemical properties.
+
+
+# Getting familiar with the data.
+
+```{r cars}
+wine_data <- read.csv("wineQualityReds.csv", header = TRUE, sep=",")
+summary(wine_data)
+names(wine_data)
+  
+```
+Variable Identification:
+All the variables are categorical or ordinal variables. the chemical properties are predictor variables and the outcome is the quality.
+
+## Univariate Data Analysis.
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+#Fixed acidity
+ggplot(aes(x= wine_data$fixed.acidity), data = wine_data)+
+  geom_histogram()+
+  scale_x_continuous()
+
+#Volatile acidity
+ggplot(aes(x= wine_data$volatile.acidity), data = wine_data)+
+  geom_histogram()+
+  scale_x_continuous(limits=c(0.2,0.8))
+
+#Citric acidity
+ggplot(aes(x=wine_data$citric.acid), data= wine_data) +
+  geom_histogram()+
+  scale_x_continuous(limits = c(0,0.6))
+
+#Residual Sugar
+ggplot(aes(x=wine_data$residual.sugar), data= wine_data) +
+  geom_histogram()+
+  scale_x_continuous(limits = c(1,4))
+
+#Chlorides
+ggplot(aes(x=wine_data$chlorides), data= wine_data)+
+  geom_histogram()+
+  scale_x_continuous(limits = c(0.025,0.15))
+
+#Free suplhu dioxide
+ggplot(aes(x=wine_data$free.sulfur.dioxide), data= wine_data)+
+  geom_histogram()+
+  scale_x_continuous(limits = c(0,40))
+
+#Total Sulphur dioxide
+ggplot(aes(x=wine_data$total.sulfur.dioxide), data= wine_data)+
+  geom_histogram()+
+  scale_x_continuous(limits=c(0,100))
+
+#Density
+ggplot(aes(x=wine_data$density), data=wine_data)+
+  geom_histogram()+
+  scale_x_continuous()
+
+#PH
+ggplot(aes(x=wine_data$pH), data= wine_data)+
+  geom_histogram()+
+  scale_x_continuous(limits = c(3,3.75))
+
+#Sulphates
+ggplot(aes(x=wine_data$sulphates), data= wine_data)+
+  geom_histogram()+
+  scale_x_continuous(limits=c(0.25,1))
+
+#Alcohol
+ggplot(aes(x=wine_data$alcohol), data= wine_data)+
+  geom_histogram()+
+  scale_x_continuous(limits = c(9,13))
+
+#Quality
+ggplot(aes(x=wine_data$quality), data= wine_data)+
+  geom_histogram()+
+  scale_x_continuous()
+
+```
+There are outliers in fixed acidity.
+
+
+# Summary Statistics
+
+```{r}
+summary(wine_data$fixed.acidity)
+summary(wine_data$volatile.acidity)
+summary(wine_data$citric.acid)
+summary(wine_data$residual.sugar)
+summary(wine_data$chlorides)
+summary(wine_data$free.sulfur.dioxide)
+summary(wine_data$total.sulfur.dioxide)
+summary(wine_data$density)
+summary(wine_data$pH)
+summary(wine_data$sulphates)
+summary(wine_data$alcohol)
+summary(wine_data$quality)
+```
+
+
+#Correlation
+
+```{r}
+cor(x=wine_data[,2:13], y=wine_data[,2:13])
+
+pairs(~wine_data$fixed.acidity+wine_data$volatile.acidity+wine_data$citric.acid+wine_data$residual.sugar+wine_data$chlorides+wine_data$free.sulfur.dioxide+ wine_data$total.sulfur.dioxide+wine_data$density+wine_data$pH+wine_data$sulphates+wine_data$alcohol+wine_data$quality, data=wine_data, main="Scatter plots")
+```
+Quality of wine correlates strongly with alcohol, volatile acididty, suplhates, citric acid, as compared to the other variables. So we can consider these four variables to understand tehir association with wine quality scores.
+
+
+# Scatterplot matrix
+# Lets consider the highest correlated chemical properties.
+
+#Alcohol
+```{r}
+ggplot(aes(x=wine_data$quality, y= wine_data$alcohol), data= wine_data) +
+  geom_jitter(alpha=1/10)+
+  scale_x_continuous(breaks = seq(0,8,1))+
+  geom_smooth(method='lm', aes(group=1))+
+  geom_hline(yintercept = mean(wine_data$alcohol), linetype="longdash", color='red')+
+  geom_vline(xintercept = mean(wine_data$quality), linetype="longdash", color='red')
+```
+
+Relationship between alcohol and wine scores:
+From the scatterplot, we can see that the wine scores have a positive relationship with the percent alcohol content in wine. Wine scores in the higher range of 5 to 8, tend to have a higher alcohol content between 10 to 12.
+
+#Volatile acidity
+```{r}
+tapply(wine_data$volatile.acidity, wine_data$quality, mean)
+ggplot(aes(x= wine_data$quality, y=wine_data$volatile.acidity), data= wine_data)+
+  geom_jitter(alpha=1/10)+
+  geom_smooth(method='lm', aes(group=1))+
+  geom_hline(yintercept = mean(wine_data$volatile.acidity), color='red', linetype='longdash')+
+  geom_vline(xintercept = mean(wine_data$quality), color='red', linetype='longdash')
+```
+Relationship between volatile acidity and wine scores.
+From the pot, we can say that wines have a lower score for higher values of volatile acidity. This indicates that they have a negative association. This might be intuitive as volatile acidity in wine increases the acetiec acid content and leads to a more prominent vinegar taste. Presence of this taste is a not a good indication of a high quality wine.
+
+
+#Sulphates
+
+```{r}
+tapply(wine_data$sulphates, wine_data$quality, mean)
+ggplot(aes(x= wine_data$quality, y=wine_data$sulphates), data= wine_data)+
+  geom_jitter(alpha=1/10)+
+  geom_smooth(method='lm', aes(group=1))+
+  geom_hline(yintercept = mean(wine_data$sulphates), color='red', linetype='longdash')+
+  geom_vline(xintercept = mean(wine_data$quality), color='red', linetype='longdash')
+```
+Relationship between suplhates and wine qulaity scores:
+There seems to a be a positive asscociation between wine quality scores and sulphates content in wine. As suplhates prevents microbial growth and oxidation of wine, it might be a good indication of a high quality wine. The wine quality score increases drastically with just a small increase in sulphates.
+
+
+# Citric acid
+```{r}
+tapply(wine_data$citric.acid, wine_data$quality, mean)
+ggplot(aes(x= wine_data$quality, y=wine_data$citric.acid), data= wine_data)+
+  geom_jitter(alpha=1/10)+
+  geom_smooth(method='lm', aes(group=1))+
+  geom_hline(yintercept = mean(wine_data$citric.acid), color='red', linetype='longdash')+
+  geom_vline(xintercept = mean(wine_data$quality), color='red', linetype='longdash')
+```
+Realtionship between wine qulaity scores and citric acid content:
+There seems to be a positive relationship between the citric acid content and the wine quality scores. As citric acid brings freshness to the taste of wine, it might be indicative of a high qulaity wine.
+
+
+
+# Multivarate data analysis:
+# Volatile acidity vs alcohol
+```{r}
+ggplot(aes(wine_data$alcohol, wine_data$volatile.acidity), data=wine_data)+
+  geom_point(aes(color=quality, size=quality)) +
+  geom_hline(yintercept = mean(wine_data$volatile.acidity), color='red', linetype='longdash')+
+  geom_vline(xintercept = mean(wine_data$alcohol), color='red', linetype='longdash')
+```
+From the plot, we can see that wines having higher alcohol content and lower volatile sulphates have higher quality scores.
+
+
+#Citric acid vs alcohol
+```{r}
+ggplot(aes(wine_data$alcohol, wine_data$citric.acid), data=wine_data)+
+  geom_point(aes(color=quality, size=quality)) +
+  geom_hline(yintercept = mean(wine_data$citric.acid), color='red', linetype='longdash')+
+  geom_vline(xintercept = mean(wine_data$alcohol), color='red', linetype='longdash')
+```
+From the plot, we can see that wines have higher quality scores, when their alcohol and citric content are in the higher ranges.
+
+#Citric acid vs volatile acidity
+```{r}
+ggplot(aes(wine_data$volatile.acidity, wine_data$citric.acid), data=wine_data)+
+  geom_point(aes(color=quality, size=quality)) +
+  geom_hline(yintercept = mean(wine_data$citric.acid), color='red', linetype='longdash')+
+  geom_vline(xintercept = mean(wine_data$volatile.acidity), color='red', linetype='longdash')
+```
+From the plot we can see that wines having a higher level citric content and lower level volatile acid have higher quality scores.
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
