@@ -2,12 +2,13 @@
 title: "WineQuality"
 author: "Suchitra"
 date: "2/18/2017"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-#install.packages("dplyr")
+library(lattice)
 library(dplyr)
 library(ggplot2)
 ```
@@ -232,3 +233,64 @@ ggplot(aes(wine_data$volatile.acidity, wine_data$citric.acid), data=wine_data)+
 From the plot we can see that wines having a higher level citric content and lower level volatile acid have higher quality scores.
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+#Building a linear regression model.
+```{r}
+quality_mdl <- lm(wine_data$quality ~ wine_data$alcohol +wine_data$volatile.acidity + wine_data$sulphates +wine_data$citric.acid, data=wine_data)
+
+summary(quality_mdl)
+```
+Intercept is 1.874
+slope is 0.36084
+Thus the formula is: quality= 0.36*alcohol + 1.874
+Both the Pr values for the intercept and the slope is less than 0.05.The stars at the right of these value indicate the level of significance.
+p value implies that the observtion is statistically significant.
+
+
+#Testing the Linear regression assumptions with the help of the residual diagnostics
+#Residual analysis.
+```{r}
+xyplot(resid(quality_mdl) ~ fitted(quality_mdl),
+  xlab = "Fitted Values",
+  ylab = "Residuals",
+  main = "Residual Diagnostic Plot",
+  panel = function(x, y, ...)
+  {
+    panel.grid(h = -1, v = -1)
+    panel.abline(h = 0)
+    panel.xyplot(x, y, ...)
+  }
+)
+?xyplot
+```
+
+#Prediction
+```{r}
+#splitting data 75:25
+
+#Computing sample_size of the train dataset
+sample_size <- floor(0.7*nrow(wine_data))
+#Load the train and test data
+set.seed(100)
+train_indices <- sample(seq_len(nrow(wine_data)), size = sample_size)
+
+
+#Load the train and test dataset
+train_data <- wine_data[train_indices,]
+test_data <- wine_data[-train_indices,]
+
+#Build a prediction model
+linear1 <- lm(wine_data$quality ~ wine_data$alcohol+wine_data$sulphates+wine_data$citric.acid+wine_data$volatile.acidity, train_data)
+summary(linear1)
+
+#Testing the prediction model
+predicted=predict(linear1,test_data)
+head(predicted)
+head(test_data$quality)
+
+#Calculating multiple R squared for test data
+SSE <- sum((test_data$quality-predicted)^2)
+SST <-sum((test_data$quality-mean(test_data$quality))^2)
+1-(SSE/SST)
+```
+
