@@ -3,8 +3,8 @@ title: "WineQuality"
 author: "Suchitra"
 date: "2/18/2017"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -261,7 +261,6 @@ xyplot(resid(quality_mdl) ~ fitted(quality_mdl),
     panel.xyplot(x, y, ...)
   }
 )
-?xyplot
 ```
 
 #Prediction
@@ -292,5 +291,20 @@ head(test_data$quality)
 SSE <- sum((test_data$quality-predicted)^2)
 SST <-sum((test_data$quality-mean(test_data$quality))^2)
 1-(SSE/SST)
+```
+
+#Random forest
+```{r}
+library(randomForest)
+wine_rf <- randomForest(as.factor(quality)~alcohol+sulphates+citric.acid+volatile.acidity, data=train_data, importance=TRUE, ntree=1000,mtry=2)
+varImpPlot(wine_rf)
+
+
+wine_rf
+
+wine_predict <- predict(wine_rf,test_data)
+table(wine_predict, test_data$quality)
+wine_acc <- (170+118+30)/nrow(test_data)
+wine_acc
 ```
 
