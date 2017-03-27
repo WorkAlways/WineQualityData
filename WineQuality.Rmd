@@ -6,6 +6,10 @@ output:
   html_document: default
   pdf_document: default
 ---
+#We will load the dplyr, ggplot and lattice libraries
+#dply is used for data manipulation.
+#ggplot is used for creating graphics and plots.
+#Lattice package is used for high- level data visualization.
 
 ```{r setup, include=FALSE}
 library(lattice)
@@ -13,28 +17,22 @@ library(dplyr)
 library(ggplot2)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-Variable definition:
+--->Variable definition:
 
 Fixed acidity: Acid involved with wine that are non-volatile.
 Volatile acidity: Acetic acid in wine that at high levels leads to a taste of vinegar.
 Citric acid: Present in small quantities, add freshness and flavor to wine.
-Residual sugar: Sugra thats left after the fermentation stops.
+Residual sugar: Sugar thats left after the fermentation stops.
 chlorides:The amount of salts in wine.
 Free sulphur dioxide:Prevents microbial growth and oxidation of wine.
 Total: Amount of free + bound forms of SO2.
 Density: Depends on the percent alcohol and sugar content.
 PH : Acidic or basic.
-Sulphates: Wine additive which ontributes to sulphur dioxide.
+Sulphates: Wine additive which contributes to sulphur dioxide.
 Alcohol: Percent alcohol content in wine.
 Quality: Output variable.
 
-Questions:
+--->Questions:
 1. How is human tasting of wine related to the chemical properties.
 
 
@@ -44,20 +42,20 @@ Questions:
 wine_data <- read.csv("wineQualityReds.csv", header = TRUE, sep=",")
 summary(wine_data)
 names(wine_data)
-  
+str(wine_data)  
 ```
-Variable Identification:
-All the variables are categorical or ordinal variables. the chemical properties are predictor variables and the outcome is the quality.
+
+---->Variable Identification:
+All the variables are categorical or continuous variables. The chemical properties(continuous variables) are predictor variables and quality.(ordinal variable) is the outcome/target variable.
 
 ## Univariate Data Analysis.
-
-You can also embed plots, for example:
+#We analyze the variables individually to understand their behavior
 
 ```{r pressure, echo=FALSE}
 #Fixed acidity
 ggplot(aes(x= wine_data$fixed.acidity), data = wine_data)+
   geom_histogram()+
-  scale_x_continuous()
+  scale_x_continuous(limits = c(6,12))
 
 #Volatile acidity
 ggplot(aes(x= wine_data$volatile.acidity), data = wine_data)+
@@ -115,7 +113,6 @@ ggplot(aes(x=wine_data$quality), data= wine_data)+
   scale_x_continuous()
 
 ```
-There are outliers in fixed acidity.
 
 
 # Summary Statistics
@@ -143,7 +140,7 @@ cor(x=wine_data[,2:13], y=wine_data[,2:13])
 
 pairs(~wine_data$fixed.acidity+wine_data$volatile.acidity+wine_data$citric.acid+wine_data$residual.sugar+wine_data$chlorides+wine_data$free.sulfur.dioxide+ wine_data$total.sulfur.dioxide+wine_data$density+wine_data$pH+wine_data$sulphates+wine_data$alcohol+wine_data$quality, data=wine_data, main="Scatter plots")
 ```
-Quality of wine correlates strongly with alcohol, volatile acididty, suplhates, citric acid, as compared to the other variables. So we can consider these four variables to understand tehir association with wine quality scores.
+Quality of wine correlates strongly with alcohol, volatile acididty, suplhates, citric acid, as compared to the other variables. So we can consider these four variables to understand their association with wine quality scores.
 
 
 # Scatterplot matrix
@@ -172,7 +169,7 @@ ggplot(aes(x= wine_data$quality, y=wine_data$volatile.acidity), data= wine_data)
   geom_vline(xintercept = mean(wine_data$quality), color='red', linetype='longdash')
 ```
 Relationship between volatile acidity and wine scores.
-From the pot, we can say that wines have a lower score for higher values of volatile acidity. This indicates that they have a negative association. This might be intuitive as volatile acidity in wine increases the acetiec acid content and leads to a more prominent vinegar taste. Presence of this taste is a not a good indication of a high quality wine.
+From the plot, we can say that wines have a lower score for higher values of volatile acidity. This indicates that they have a negative association. This might be intuitive as volatile acidity in wine increases the acetic acid content and leads to a more prominent vinegar taste. Presence of this taste is a not a good indication of a high quality wine.
 
 
 #Sulphates
@@ -207,32 +204,34 @@ There seems to be a positive relationship between the citric acid content and th
 # Volatile acidity vs alcohol
 ```{r}
 ggplot(aes(wine_data$alcohol, wine_data$volatile.acidity), data=wine_data)+
-  geom_point(aes(color=quality, size=quality)) +
+  geom_jitter(aplha=1/20)+
+  geom_point(aes(color=quality)) +
   geom_hline(yintercept = mean(wine_data$volatile.acidity), color='red', linetype='longdash')+
   geom_vline(xintercept = mean(wine_data$alcohol), color='red', linetype='longdash')
 ```
-From the plot, we can see that wines having higher alcohol content and lower volatile sulphates have higher quality scores.
-
+From the plot, we can see that wines having high alcohol content and low volatile acidity have higher quality scores. But there is noe specific values of alcohol content and volatile acidity for lower quality scores.
 
 #Citric acid vs alcohol
 ```{r}
 ggplot(aes(wine_data$alcohol, wine_data$citric.acid), data=wine_data)+
-  geom_point(aes(color=quality, size=quality)) +
+  geom_point(aes(color=quality)) +
   geom_hline(yintercept = mean(wine_data$citric.acid), color='red', linetype='longdash')+
   geom_vline(xintercept = mean(wine_data$alcohol), color='red', linetype='longdash')
+  
+
 ```
-From the plot, we can see that wines have higher quality scores, when their alcohol and citric content are in the higher ranges.
+From the plot, we can see that wines have higher quality scores, when their alcohol and citric acid content are in the higher ranges. Again there is noe specific pattern for low quality scores of wine.
 
 #Citric acid vs volatile acidity
 ```{r}
 ggplot(aes(wine_data$volatile.acidity, wine_data$citric.acid), data=wine_data)+
-  geom_point(aes(color=quality, size=quality)) +
+  geom_point(aes(color=quality)) +
   geom_hline(yintercept = mean(wine_data$citric.acid), color='red', linetype='longdash')+
   geom_vline(xintercept = mean(wine_data$volatile.acidity), color='red', linetype='longdash')
 ```
 From the plot we can see that wines having a higher level citric content and lower level volatile acid have higher quality scores.
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
 
 #Building a linear regression model.
 ```{r}
@@ -250,6 +249,7 @@ p value implies that the observtion is statistically significant.
 #Testing the Linear regression assumptions with the help of the residual diagnostics
 #Residual analysis.
 ```{r}
+
 xyplot(resid(quality_mdl) ~ fitted(quality_mdl),
   xlab = "Fitted Values",
   ylab = "Residuals",
@@ -262,6 +262,8 @@ xyplot(resid(quality_mdl) ~ fitted(quality_mdl),
   }
 )
 ```
+We plot the predicted values which we get using the quality_mdl on the x axis and the residual values on the y axis. Ecah point in this plot is a wine quality score, with the predicted values on the x axis and the accuracy on the y axis.
+The residual diagnostic plot shows a peculian pattern, and they are not evenly distributed. Theere re no clusters at the middle of the plot or around the lower values of y. Thus this signifies that  there is significant room for improvement in the model that we built.
 
 #Prediction
 ```{r}
@@ -292,6 +294,9 @@ SSE <- sum((test_data$quality-predicted)^2)
 SST <-sum((test_data$quality-mean(test_data$quality))^2)
 1-(SSE/SST)
 ```
+Here the multiple R squared value denotes the variance explained by the model. Since R^2 is less than zero, we can say that this model is a bad fit to the data.
+
+We now use a random forest regression model on the wine quality data, to see if the model is a good fit and make preictions for the quality of the produce.
 
 #Random forest
 ```{r}
@@ -307,4 +312,6 @@ table(wine_predict, test_data$quality)
 wine_acc <- (170+118+30)/nrow(test_data)
 wine_acc
 ```
+We have built a random forest model using the 4 important variables. The variable importance plot shows the effect of variable removal on the accuracy of the model. Thus the alcohol content in wine predicts the quality score the best, followed by volatile acidity, sulphates and then citric acid.
 
+The random forest model fit on the wine quality data, gives an accuracy of 0.66, which high. 
